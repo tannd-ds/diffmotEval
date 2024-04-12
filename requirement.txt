@@ -1,5 +1,5 @@
 einops
-yaml
+pyyaml
 argparse
 easydict
 numpy

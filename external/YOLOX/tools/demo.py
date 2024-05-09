@@ -83,6 +83,7 @@ def make_parser():
         action="store_true",
         help="Using TensorRT model for testing.",
     )
+    parser.add_argument("--num_classes", default=80, type=int, help="number of classes")
     return parser
 
 
@@ -268,6 +269,7 @@ def main(exp, args):
     if args.tsize is not None:
         exp.test_size = (args.tsize, args.tsize)
 
+    exp.num_classes = args.num_classes
     model = exp.get_model()
     logger.info("Model Summary: {}".format(get_model_info(model, exp.test_size)))
 

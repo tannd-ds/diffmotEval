@@ -141,23 +141,23 @@ if __name__ == '__main__':
     # Download YOLOX
     download_weights(file_name=args.weight, url=yolo_weight_map[args.weight])
 
-    # # Define the command to run the Python script
-    # command = ["python", "external/YOLOX/tools/demo.py", "image", 
-    #            "-n", args.yolox_type, 
-    #            "-c", f"weights/{args.weight}", 
-    #            "--path", args.output_video_path, 
-    #            "--output_txt_path", args.output_txt_path,
-    #            "--conf", "0.45", "--nms", "0.45", "--tsize", "640", "--num_classes", "1", 
-    #            "--legacy", "--save_result", "--save_txt", "--device", "gpu"]
+    # Define the command to run the Python script
+    command = ["python", "external/YOLOX/tools/demo.py", "image", 
+               "-n", args.yolox_type, 
+               "-c", f"weights/{args.weight}", 
+               "--path", args.output_video_path, 
+               "--output_txt_path", args.output_txt_path,
+               "--conf", "0.45", "--nms", "0.45", "--tsize", "640", "--num_classes", "1", 
+               "--legacy", "--save_result", "--save_txt", "--device", "gpu"]
 
-    # # Run the command
-    # result = subprocess.run(command, capture_output=True, text=True)
+    # Run the command
+    result = subprocess.run(command, capture_output=True, text=True)
 
-    # # Check if the command was successful
-    # if result.returncode == 0:
-    #     print("Python script executed successfully!")
-    # else:
-    #     print("Error running Python script:")
-    #     print(result.stderr)
+    # Check if the command was successful
+    if result.returncode == 0:
+        print("Python script executed successfully!")
+    else:
+        print("Error running Python script:")
+        print(result.stderr)
 
     main(args=args)

@@ -12,3 +12,11 @@ env/
 # Ignore local configuration files
 *.env
 
+# Ignore build directories
+build/
+
+# Ignore .egg-info directories
+*.egg-info/
+
+# Ignore .so files (shared objects)
+*.so

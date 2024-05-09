@@ -31,6 +31,9 @@ def make_parser():
     parser.add_argument(
         "--path", default="./assets/dog.jpg", help="path to images or video"
     )
+    parser.add_argument(
+        "--output_txt_path", default="outputs/demo/img1", help="path to txt folder"
+    )
     parser.add_argument("--camid", type=int, default=0, help="webcam demo camera id")
     parser.add_argument(
         "--save_result",
@@ -200,12 +203,14 @@ def image_demo(predictor, vis_folder, txt_folder, path, current_time, save_resul
     else:
         files = [path]
     files.sort()
+
     for image_name in files:
         outputs, img_info = predictor.inference(image_name)
         result_image = predictor.visual(outputs[0], img_info, predictor.confthre)
+        postfix = image_name.split('/')[1]
         if save_txt:
             save_folder = os.path.join(
-                txt_folder, time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
+                txt_folder, "detections", postfix
             )
             os.makedirs(save_folder, exist_ok=True)
             save_file_name = os.path.join(save_folder, os.path.basename(image_name.split('.')[0]+'.txt'))
@@ -233,6 +238,11 @@ def image_demo(predictor, vis_folder, txt_folder, path, current_time, save_resul
         if ch == 27 or ch == ord("q") or ch == ord("Q"):
             break
 
+    seqinfo_content = f"[Sequence]\nname=MOT17-02-DPM\nimDir=img1\nframeRate=30\nseqLength={len(files)}\nimWidth={img_info['width']}\nimHeight={img_info['height']}\nimExt=.jpg\n"
+
+    seqinfo_path = os.path.join(txt_folder, postfix, 'seqinfo.ini')
+    with open(seqinfo_path, 'w') as file:
+        file.write(seqinfo_content)
 
 def imageflow_demo(predictor, vis_folder, current_time, args):
     cap = cv2.VideoCapture(args.path if args.demo == "video" else args.camid)
@@ -282,7 +292,7 @@ def main(exp, args):
         os.makedirs(vis_folder, exist_ok=True)
     txt_folder = None
     if args.save_txt:
-        txt_folder = os.path.join(file_name, "txt_res")
+        txt_folder = args.output_txt_path
         os.makedirs(txt_folder, exist_ok=True)
 
     if args.trt:

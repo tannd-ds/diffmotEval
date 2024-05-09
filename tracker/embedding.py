@@ -173,7 +173,7 @@ class EmbeddingComputer:
                 path = "external/weights/mot20_sbs_S50.pth"
             else:
                 return self._get_general_model()
-        elif self.dataset == "dance":
+        elif self.dataset == "dancetrack":
             path = "external/weights/dance_sbs_S50.pth"
             # path = "/home/estar/lwy/DiffMOT/external/weights/dancetrack_sbs_S50_hybtid.pth"
         elif self.dataset == "sports":

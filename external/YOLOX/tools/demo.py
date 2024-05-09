@@ -5,6 +5,7 @@
 import argparse
 import os
 import time
+import re
 from loguru import logger
 
 import cv2
@@ -35,6 +36,11 @@ def make_parser():
         "--save_result",
         action="store_true",
         help="whether to save the inference result of image/video",
+    )
+    parser.add_argument(
+        "--save_txt",
+        action="store_true",
+        help="whether to save the inference result of txt format",
     )
 
     # exp file
@@ -188,7 +194,7 @@ class Predictor(object):
         return vis_res
 
 
-def image_demo(predictor, vis_folder, path, current_time, save_result):
+def image_demo(predictor, vis_folder, txt_folder, path, current_time, save_result, save_txt):
     if os.path.isdir(path):
         files = get_image_list(path)
     else:
@@ -197,6 +203,24 @@ def image_demo(predictor, vis_folder, path, current_time, save_result):
     for image_name in files:
         outputs, img_info = predictor.inference(image_name)
         result_image = predictor.visual(outputs[0], img_info, predictor.confthre)
+        if save_txt:
+            save_folder = os.path.join(
+                txt_folder, time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
+            )
+            os.makedirs(save_folder, exist_ok=True)
+            save_file_name = os.path.join(save_folder, os.path.basename(image_name.split('.')[0]+'.txt'))
+            logger.info("Saving detection result in {}".format(save_file_name))
+            # Open the file in write mode and write each element of the list with '\n'
+            # Define a regular expression pattern to extract the numeric part
+            pattern = r'\d+'  # This pattern matches one or more digits
+            frame = int(re.search(pattern, image_name).group()) 
+
+            with open(save_file_name, "w") as file:
+                for item in outputs[0].detach().cpu().numpy():
+                    item = [str(num) for num in item]
+                    item = str(frame) + ',' + ','.join(item[:5])
+                    file.write(item + '\n')
+
         if save_result:
             save_folder = os.path.join(
                 vis_folder, time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
@@ -256,6 +280,10 @@ def main(exp, args):
     if args.save_result:
         vis_folder = os.path.join(file_name, "vis_res")
         os.makedirs(vis_folder, exist_ok=True)
+    txt_folder = None
+    if args.save_txt:
+        txt_folder = os.path.join(file_name, "txt_res")
+        os.makedirs(txt_folder, exist_ok=True)
 
     if args.trt:
         args.device = "gpu"
@@ -319,7 +347,7 @@ def main(exp, args):
     )
     current_time = time.localtime()
     if args.demo == "image":
-        image_demo(predictor, vis_folder, args.path, current_time, args.save_result)
+        image_demo(predictor, vis_folder, txt_folder, args.path, current_time, args.save_result, args.save_txt)
     elif args.demo == "video" or args.demo == "webcam":
         imageflow_demo(predictor, vis_folder, current_time, args)
 

@@ -20,3 +20,11 @@ build/
 
 # Ignore .so files (shared objects)
 *.so
+
+# Ignore extra directories
+output/
+weights/
+YOLOX_outputs/
+
+# Ignore extra files
+*.mp4

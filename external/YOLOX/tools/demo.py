@@ -218,13 +218,16 @@ def image_demo(predictor, vis_folder, txt_folder, path, current_time, save_resul
             # Open the file in write mode and write each element of the list with '\n'
             # Define a regular expression pattern to extract the numeric part
             pattern = r'\d+'  # This pattern matches one or more digits
-            frame = int(re.search(pattern, image_name).group()) 
+            frame = int(re.search(pattern, image_name.split('/')[-1]).group()) 
 
             with open(save_file_name, "w") as file:
-                for item in outputs[0].detach().cpu().numpy():
-                    item = [str(num) for num in item]
-                    item = str(frame) + ',' + ','.join(item[:5])
-                    file.write(item + '\n')
+                if outputs[0] is not None:
+                    for item in outputs[0].cpu().numpy():
+                        item = [str(num) for num in item]
+                        item = str(frame) + ',' + ','.join(item[:5])
+                        file.write(item + '\n')
+                else:
+                    file.write('\n')
 
         if save_result:
             save_folder = os.path.join(

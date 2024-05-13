@@ -12,7 +12,7 @@ import argparse
 import yaml
 from easydict import EasyDict
 
-def extract_frames(video_path, output_folder):
+def extract_frames(video_path, output_folder, target_width=640):
     # Create the output folder if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 
@@ -30,6 +30,14 @@ def extract_frames(video_path, output_folder):
         # Open the video file
         cap = cv2.VideoCapture(video_path)
 
+        # Get original video properties
+        original_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        original_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        # Calculate the scale factor
+        scale_factor = target_width / original_width
+        target_height = int(original_height * scale_factor)
+
         # Variable to keep track of frame count
         frame_count = 0
 
@@ -41,7 +49,10 @@ def extract_frames(video_path, output_folder):
 
             # Save the frame as an image
             frame_path = os.path.join(output_folder, f"{frame_count+1:05d}.jpg")
-            cv2.imwrite(frame_path, frame)
+
+            # Resize the frame
+            resized_frame = cv2.resize(frame, (target_width, target_height))
+            cv2.imwrite(frame_path, resized_frame)
 
             frame_count += 1
 
@@ -61,7 +72,7 @@ def download_weights(weight_root="weights", file_name="", url=""):
 
     # Check if the file already exists
     if os.path.exists(local_file_path):
-        print(f"File '{local_file_path}' already exists. Skipping download.")
+        print(f"> File '{local_file_path}' already exists. Skipping download.")
         return
 
     # Send a GET request to the URL
@@ -79,9 +90,9 @@ def download_weights(weight_root="weights", file_name="", url=""):
         with open(local_file_path, 'wb') as f:
             f.write(file_content)
 
-        print(f"File downloaded successfully to '{local_file_path}'")
+        print(f"> File downloaded successfully to '{local_file_path}'")
     else:
-        print(f"Failed to download file: {response.status_code} - {response.reason}")
+        print(f"> Failed to download file: {response.status_code} - {response.reason}")
 
 def main(args):
     with open(args.config) as f:
@@ -104,6 +115,8 @@ def main(args):
 Note that do not change the path policy
 python demo.py --video_path siren.mp4 --output_video_path outputs/siren/img1 --weight DanceTrack_yolox_s.tar --yolox_type yolox-s \
         --output_txt_path outputs --config ./configs/demo_test.yaml --dataset DanceTrack
+python demo.py --video_path weapon.mp4 --output_video_path outputs/weapon/img1 --weight MOT20_yolox_x.tar --yolox_type yolox-x \
+        --output_txt_path outputs --config ./configs/demo_test.yaml --dataset MOT20
 """
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -134,9 +147,11 @@ if __name__ == '__main__':
 
     # Download re_id
     download_weights(weight_root="external/weights", file_name="dance_sbs_S50.pth", url="https://github.com/Kroery/DiffMOT/releases/download/v1.0/dance_sbs_S50.pth")
+    download_weights(weight_root="external/weights", file_name="mot20_sbs_S50.pth", url="https://github.com/Kroery/DiffMOT/releases/download/v1.0/mot20_sbs_S50.pth")
 
     # Download DiffMOT
-    download_weights(weight_root="experiments/mot_ddm_1000_deeper", file_name="DanceTrack_epoch800.pt", url="https://github.com/Kroery/DiffMOT/releases/download/v1.0/DanceTrack_epoch800.pt")
+    DiffMOT_prefix = "MOT" if "MOT" in args.dataset else args.dataset
+    download_weights(weight_root="experiments/mot_ddm_1000_deeper", file_name=f"{args.dataset}_epoch800.pt", url=f"https://github.com/Kroery/DiffMOT/releases/download/v1.0/{DiffMOT_prefix}_epoch800.pt")
 
     # Download YOLOX
     download_weights(file_name=args.weight, url=yolo_weight_map[args.weight])

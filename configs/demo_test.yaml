@@ -21,7 +21,7 @@ gpus: [0,1,2,3]
 eval_at: 800
 det_dir: "./outputs/detections/"
 info_dir: "./outputs"
-reid_dir: "weights/embedding"
+reid_dir: "weights/embedding" # Change this to 'weights/no-embedding' to not use reid cache"
 save_dir: "outputs/yolox_m_lt_ddm_1000eps_deeper_800_1rev"
 eval_expname: mot_ddm_1000_deeper
 high_thres: 0.4

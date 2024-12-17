@@ -7,7 +7,7 @@ lr: 0.0001
 # train
 data_dir: '/mnt/8T/home/estar/data/DanceTrack/trackers_gt'
 diffnet: HMINet
-interval: 5
+interval: 9
 augment: True
 encoder_dim: 256
 tf_layer: 3
@@ -32,4 +32,4 @@ preprocess_workers: 16
 
 # Data Parameters:
 device: cuda
-eval_device: None
+eval_device: cuda

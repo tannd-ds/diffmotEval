@@ -20,6 +20,8 @@ from tracking_utils.log import logger
 from tracking_utils.timer import Timer
 from tracking_utils.visualization import plot_tracking
 
+from models.tannd_variants import *
+
 def write_results(filename, results, data_type='mot'):
     if data_type == 'mot':
         save_format = '{frame},{id},{x1},{y1},{w},{h},1,-1,-1,-1\n'
@@ -51,6 +53,9 @@ class DiffMOT():
         self.config = config
         torch.backends.cudnn.benchmark = True
         self._build()
+
+        self.current_frame_id = 0
+        self.tracker = diffmottracker(self.config)
 
     def train(self):
         for epoch in range(1, self.config.epochs + 1):
@@ -179,10 +184,10 @@ class DiffMOT():
         self.log.info("\n")
 
 
-        if self.config.eval_mode:
-            epoch = self.config.eval_at
-            checkpoint_dir = osp.join(self.model_dir, f"{self.config.dataset}_epoch{epoch}.pt")
-            self.checkpoint = torch.load(checkpoint_dir, map_location = "cpu")
+        # if self.config.eval_mode:
+        #     epoch = self.config.eval_at
+        #     checkpoint_dir = osp.join(self.model_dir, f"{self.config.dataset}_epoch{epoch}.pt")
+        #     self.checkpoint = torch.load(checkpoint_dir, map_location = "cpu")
 
         print("> Directory built!")
 
@@ -198,7 +203,8 @@ class DiffMOT():
     def _build_model(self):
         """ Define Model """
         config = self.config
-        model = D2MP(config, encoder=self.encoder)
+        # model = D2MP(config, encoder=self.encoder)
+        model = TransformerDiffMOTModel(config)
 
         self.model = model
         if not self.config.eval_mode:
@@ -208,7 +214,8 @@ class DiffMOT():
             self.model = self.model.eval()
 
         if self.config.eval_mode:
-            self.model.load_state_dict({k.replace('module.', ''): v for k, v in self.checkpoint['ddpm'].items()})
+            # self.model.load_state_dict({k.replace('module.', ''): v for k, v in self.checkpoint['ddpm'].items()})
+            self.model.load_state_dict(torch.load("../mot-dancetrack/experiments/transformer_augmented_data_new_variance_0.0010/epoch_459.pt"))
 
         print("> Model built!")
 
@@ -225,5 +232,5 @@ class DiffMOT():
             pin_memory=True
         )
 
-    print("> Train Dataset built!")
+        print("> Train Dataset built!")
 

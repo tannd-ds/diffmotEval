@@ -103,6 +103,7 @@ class D2MP_OB(Module):
         self.var_sched = var_sched
         self.eps = self.config.eps
         self.weight = True
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     def q_sample(self, x_start, noise, t, C):
         time = t.reshape(C.shape[0], *((1,) * (len(C.shape) - 1)))
@@ -134,7 +135,7 @@ class D2MP_OB(Module):
             t = torch.rand(x_0.shape[0], device=x_0.device) * (1. - self.eps) + self.eps
 
         beta = t.log() / 4
-        e_rand = torch.randn_like(x_0).cuda()  # (B, N, d)
+        e_rand = torch.randn_like(x_0).to(self.device)  # (B, N, d)
         C = -1 * x_0
         x_noisy = self.q_sample(x_start=x_0, noise=e_rand, t=t, C=C)
         t = t.reshape(-1, 1)

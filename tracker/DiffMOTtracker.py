@@ -81,7 +81,7 @@ class STrack(BaseTrack):
             conds = [st.conds for st in stracks]
 
             multi_track_pred = model.generate(conds, sample=1, bestof=True, img_w=img_w, img_h=img_h)
-            track_pred = multi_track_pred.mean(0)
+            track_pred = multi_track_pred
 
 
             track_pred = track_pred + dets
@@ -233,6 +233,7 @@ class STrack(BaseTrack):
 
 class diffmottracker(object):
     def __init__(self, config, frame_rate=30):
+        self.model = None
         self.config = config
         self.tracked_stracks = []  # type: list[STrack]
         self.lost_stracks = []  # type: list[STrack]

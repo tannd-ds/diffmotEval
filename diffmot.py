@@ -184,10 +184,10 @@ class DiffMOT():
         self.log.info("\n")
 
 
-        # if self.config.eval_mode:
-        #     epoch = self.config.eval_at
-        #     checkpoint_dir = osp.join(self.model_dir, f"{self.config.dataset}_epoch{epoch}.pt")
-        #     self.checkpoint = torch.load(checkpoint_dir, map_location = "cpu")
+        if self.config.eval_mode:
+            epoch = self.config.eval_at
+            checkpoint_dir = osp.join(self.model_dir, f"{self.config.dataset}_epoch{epoch}.pt")
+            self.checkpoint = torch.load(checkpoint_dir, map_location = "cpu")
 
         print("> Directory built!")
 
@@ -205,6 +205,8 @@ class DiffMOT():
         config = self.config
         # model = D2MP(config, encoder=self.encoder)
         model = TransformerDiffMOTModel(config)
+        model = D2MP(config, encoder=self.encoder)
+        # print('='*200)
 
         self.model = model
         if not self.config.eval_mode:
@@ -214,8 +216,7 @@ class DiffMOT():
             self.model = self.model.eval()
 
         if self.config.eval_mode:
-            # self.model.load_state_dict({k.replace('module.', ''): v for k, v in self.checkpoint['ddpm'].items()})
-            self.model.load_state_dict(torch.load("../mot-dancetrack/experiments/transformer_augmented_data_new_variance_0.0010/epoch_459.pt"))
+            self.model.load_state_dict({k.replace('module.', ''): v for k, v in self.checkpoint['ddpm'].items()})
 
         print("> Model built!")
 

@@ -24,7 +24,8 @@ def main():
         if v is not None:
             config[k] = v
     config["exp_name"] = args.config.split("/")[-1].split(".")[0]
-    config["dataset"] = args.dataset
+    # config["dataset"] = args.dataset
+    print(config)
     config = EasyDict(config)
     agent = DiffMOT(config)
 
